@@ -1,0 +1,41 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '4.5.x'
+
+    - name: Initialize the CodeQL tools
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Restore dependencies
+      run: msbuild /t:restore
+
+    - name: Build the project
+      run: msbuild /p:Configuration=Debug /p:Platform="Any CPU" /p:TargetFrameworkVersion="v4.5"
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
